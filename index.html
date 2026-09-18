@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>猜拳游戏 — Rock Paper Scissors</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #1e1e2f, #2a2a40);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .container {
+      background: #2d2d44;
+      border-radius: 20px;
+      padding: 40px 50px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+      text-align: center;
+      max-width: 550px;
+      width: 100%;
+    }
+
+    h1 {
+      color: #f0e6d3;
+      font-size: 32px;
+      margin-bottom: 8px;
+      letter-spacing: 2px;
+    }
+
+    .subtitle {
+      color: #8888aa;
+      font-size: 14px;
+      margin-bottom: 25px;
+    }
+
+    /* 比分板 */
+    .scoreboard {
+      display: flex;
+      justify-content: space-between;
+      background: #1e1e30;
+      border-radius: 12px;
+      padding: 15px 25px;
+      margin-bottom: 25px;
+    }
+
+    .score-item {
+      text-align: center;
+    }
+
+    .score-label {
+      color: #aaaacc;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .score-value {
+      color: #f0e6d3;
+      font-size: 36px;
+      font-weight: bold;
+    }
+
+    .score-value.human {
+      color: #4fc3f7;
+    }
+
+    .score-value.computer {
+      color: #ef5350;
+    }
+
+    .score-value.tie {
+      color: #ffd54f;
+    }
+
+    /* 选择展示区 */
+    .choices-display {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+      padding: 20px 0;
+    }
+
+    .choice-box {
+      text-align: center;
+    }
+
+    .choice-emoji {
+      font-size: 64px;
+      display: block;
+      margin-bottom: 8px;
+      transition: transform 0.3s;
+    }
+
+    .choice-label {
+      color: #aaaacc;
+      font-size: 14px;
+    }
+
+    .vs {
+      color: #666688;
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    /* 结果信息 */
+    .result-message {
+      background: #1e1e30;
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 25px;
+      color: #f0e6d3;
+      font-size: 18px;
+      min-height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .result-message.win {
+      color: #4fc3f7;
+      border: 1px solid #4fc3f733;
+    }
+
+    .result-message.lose {
+      color: #ef5350;
+      border: 1px solid #ef535033;
+    }
+
+    .result-message.tie {
+      color: #ffd54f;
+      border: 1px solid #ffd54f33;
+    }
+
+    /* 按钮 */
+    .buttons {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .choice-btn {
+      width: 100px;
+      height: 100px;
+      border: 2px solid transparent;
+      border-radius: 16px;
+      background: #3d3d5c;
+      cursor: pointer;
+      font-size: 42px;
+      transition: all 0.25s ease;
+    }
+
+    .choice-btn:hover {
+      transform: translateY(-6px);
+      background: #4d4d70;
+      border-color: #8888bb;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    .choice-btn:active {
+      transform: translateY(0);
+    }
+
+    .choice-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* 重置按钮区域 */
+    .reset-area {
+      margin-top: 5px;
+    }
+
+    .reset-btn {
+      background: transparent;
+      border: 1px solid #555577;
+      color: #aaaacc;
+      padding: 8px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    .reset-btn:hover {
+      background: #3d3d5c;
+      color: #f0e6d3;
+      border-color: #8888bb;
+    }
+
+    .round-info {
+      color: #666688;
+      font-size: 13px;
+      margin-top: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>✊ 猜拳游戏</h1>
+    <p class="subtitle">Rock · Paper · Scissors</p>
+
+    <!-- 比分板 -->
+    <div class="scoreboard">
+      <div class="score-item">
+        <div class="score-label">👤 你</div>
+        <div class="score-value human" id="humanScore">0</div>
+      </div>
+      <div class="score-item">
+        <div class="score-label">🤝 平局</div>
+        <div class="score-value tie" id="tieScore">0</div>
+      </div>
+      <div class="score-item">
+        <div class="score-label">🤖 电脑</div>
+        <div class="score-value computer" id="computerScore">0</div>
+      </div>
+    </div>
+
+    <!-- 选择展示 -->
+    <div class="choices-display">
+      <div class="choice-box">
+        <span class="choice-emoji" id="humanEmoji">🧑</span>
+        <div class="choice-label" id="humanChoiceLabel">你的选择</div>
+      </div>
+      <div class="vs">VS</div>
+      <div class="choice-box">
+        <span class="choice-emoji" id="computerEmoji">💻</span>
+        <div class="choice-label" id="computerChoiceLabel">电脑选择</div>
+      </div>
+    </div>
+
+    <!-- 结果 -->
+    <div class="result-message" id="resultMessage">点击上方按钮开始游戏</div>
+
+    <!-- 按钮 -->
+    <div class="buttons">
+      <button class="choice-btn" data-choice="rock">🪨</button>
+      <button class="choice-btn" data-choice="paper">📄</button>
+      <button class="choice-btn" data-choice="scissors">✂️</button>
+    </div>
+
+    <!-- 重置 -->
+    <div class="reset-area">
+      <button class="reset-btn" id="resetBtn">🔄 重新开始</button>
+    </div>
+    <div class="round-info" id="roundInfo">第 0 轮</div>
+  </div>
+
+  <script>
+    const EMOJI_MAP = {
+      rock: '🪨',
+      paper: '📄',
+      scissors: '✂️'
+    };
+    const LABEL_MAP = {
+      rock: '石头',
+      paper: '布',
+      scissors: '剪刀'
+    };
+
+    let humanScore = 0;
+    let computerScore = 0;
+    let tieScore = 0;
+    let roundCount = 0;
+    let gameOver = false;
+
+    const humanScoreEl = document.getElementById('humanScore');
+    const computerScoreEl = document.getElementById('computerScore');
+    const tieScoreEl = document.getElementById('tieScore');
+    const humanEmoji = document.getElementById('humanEmoji');
+    const humanChoiceLabel = document.getElementById('humanChoiceLabel');
+    const computerEmoji = document.getElementById('computerEmoji');
+    const computerChoiceLabel = document.getElementById('computerChoiceLabel');
+    const resultMessage = document.getElementById('resultMessage');
+    const roundInfo = document.getElementById('roundInfo');
+    const buttons = document.querySelectorAll('.choice-btn');
+    const resetBtn = document.getElementById('resetBtn');
+
+    function getComputerChoice() {
+      const choices = ['rock', 'paper', 'scissors'];
+      const index = Math.floor(Math.random() * 3);
+      return choices[index];
+    }
+
+    function updateScoreboard() {
+      humanScoreEl.textContent = humanScore;
+      computerScoreEl.textContent = computerScore;
+      tieScoreEl.textContent = tieScore;
+      roundInfo.textContent = `第 ${roundCount} 轮`;
+    }
+
+    function setResultMessage(text, type) {
+      resultMessage.textContent = text;
+      resultMessage.className = 'result-message';
+      if (type) resultMessage.classList.add(type);
+    }
+
+    function playRound(humanChoice, computerChoice) {
+      if (gameOver) return;
+
+      roundCount++;
+      humanEmoji.textContent = EMOJI_MAP[humanChoice];
+      humanChoiceLabel.textContent = LABEL_MAP[humanChoice];
+      computerEmoji.textContent = EMOJI_MAP[computerChoice];
+      computerChoiceLabel.textContent = LABEL_MAP[computerChoice];
+
+      if (humanChoice === computerChoice) {
+        tieScore++;
+        setResultMessage(`🤝 平局！都出了 ${LABEL_MAP[humanChoice]}`, 'tie');
+      } else if (
+        (humanChoice === 'rock' && computerChoice === 'scissors') ||
+        (humanChoice === 'paper' && computerChoice === 'rock') ||
+        (humanChoice === 'scissors' && computerChoice === 'paper')
+      ) {
+        humanScore++;
+        setResultMessage(
+          `🎉 你赢了！${LABEL_MAP[humanChoice]} 赢 ${LABEL_MAP[computerChoice]}`,
+          'win'
+        );
+      } else {
+        computerScore++;
+        setResultMessage(
+          `😵 你输了！${LABEL_MAP[computerChoice]} 赢 ${LABEL_MAP[humanChoice]}`,
+          'lose'
+        );
+      }
+
+      updateScoreboard();
+    }
+
+    function checkGameEnd() {
+      if (humanScore >= 3) {
+        gameOver = true;
+        setResultMessage('🏆 你赢得了整场比赛！恭喜！', 'win');
+        disableButtons(true);
+      } else if (computerScore >= 3) {
+        gameOver = true;
+        setResultMessage('💀 电脑赢得了整场比赛！再接再厉！', 'lose');
+        disableButtons(true);
+      }
+    }
+
+    function disableButtons(disabled) {
+      buttons.forEach(btn => btn.disabled = disabled);
+    }
+
+    function resetGame() {
+      humanScore = 0;
+      computerScore = 0;
+      tieScore = 0;
+      roundCount = 0;
+      gameOver = false;
+
+      humanEmoji.textContent = '🧑';
+      humanChoiceLabel.textContent = '你的选择';
+      computerEmoji.textContent = '💻';
+      computerChoiceLabel.textContent = '电脑选择';
+      setResultMessage('点击上方按钮开始游戏');
+      updateScoreboard();
+      disableButtons(false);
+    }
+
+    // 绑定按钮事件
+    buttons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (gameOver) return;
+        const humanChoice = btn.dataset.choice;
+        const computerChoice = getComputerChoice();
+        playRound(humanChoice, computerChoice);
+        checkGameEnd();
+      });
+    });
+
+    // 重置事件
+    resetBtn.addEventListener('click', resetGame);
+  </script>
+</body>
+</html>
